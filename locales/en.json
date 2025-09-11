@@ -43,5 +43,7 @@
   "userCreatedSuccessfully": "User created successfully",
   "userUpdatedSuccessfully": "User updated successfully",
   "serverError": "Internal server error",
-  "testing": "Testing translation works!"
+  "testing": "Testing translation works!",
+  
+  "categoryNameValidation": "Category name must be at least 3 characters long."
 }
