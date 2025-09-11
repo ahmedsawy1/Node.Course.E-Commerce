@@ -46,4 +46,20 @@ router.delete("/:id", async(req, res) => {
   }
 })
 
+router.put("/:id", async(req, res) => {
+    try{
+    const catg = await Category.findByIdAndUpdate(req.params.id, {
+      name: req.body.name
+    })
+    if(!catg) {
+      return res.status(404).send({message: req.t("categoryNotFound")})
+    }
+
+    return res.send({message: req.t("categoryUpdatedSuccessfully")})
+  }
+  catch (err) {
+    res.status(400).send({ message: err.message });
+  }
+})
+
 module.exports = router;
