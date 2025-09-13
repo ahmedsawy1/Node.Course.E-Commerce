@@ -78,5 +78,26 @@ userSchema.pre("save", async function(next) {
     }  
 })
 
+// Instance Method: Password Comparison
+// Compares a plain text password with hashed password stored in DB
+userSchema.methods.comparePassword = async function (candidatePassword) {
+    return bcrypt.compare(candidatePassword, this.password)
+}
+
+userSchema.methods.toJSON = function () {
+    const user = this.toObject({ virtuals: true })
+    delete user.password;
+    return user
+}
+
+// _id => id
+userSchema.virtual("id").get(function() {
+    return this._id.toHexString()
+})
+
+userSchema.set("toJSON", {
+    virtuals: true
+})
+
 const User = mongoose.model("User", userSchema);
 export default User;
