@@ -1,4 +1,4 @@
-const mongoose = require("mongoose")
+import mongoose from "mongoose"
 
 const categorySchema = mongoose.Schema({
     name: String
@@ -12,4 +12,4 @@ categorySchema.set("toJSON", {
     virtuals: true
 })
 
-exports.Category = mongoose.model("Category", categorySchema)
+export const Category = mongoose.model("Category", categorySchema)
