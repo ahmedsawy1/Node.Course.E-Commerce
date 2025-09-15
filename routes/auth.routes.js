@@ -1,6 +1,7 @@
 import express from "express";
 import User from "../models/user.model.js";
 import { registerValidation, handleValidationErrors } from "../validators/auth.validator.js";
+import { generateToken } from "../helpers/jwt.js";
 
 const router = express.Router();
 
@@ -20,10 +21,13 @@ router.post("/register", registerValidation, handleValidationErrors ,async (req,
 
     await user.save();
 
+    const token = generateToken(user)
+
     res.status(201).json({
       success: true,
       message: req.t("userRegisteredSuccessfully"),
       data: user.toJSON(),
+      token: token
     });
 
   } catch (error) {

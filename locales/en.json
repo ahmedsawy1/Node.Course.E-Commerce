@@ -46,5 +46,13 @@
   "testing": "Testing translation works!",
   
   "categoryNameValidation": "Category name must be at least 3 characters long.",
-  "enterValidEmail": "Please enter a valid email."
+  "enterValidEmail": "Please enter a valid email.",
+  "passwordMinLength": "Password must be at least 6 characters.",
+  "invalidRole": "Role must be either admin or user.",
+  "userNameRequired": "User name is required.",
+  "cityRequired": "City name is required.",
+  "postalCodeRequired": "Postal code is required.",
+  "addressLine1Required": "First address is required.",
+  "phoneNumberRequired": "Phone number is required.",
+  "invalidPhoneNumber": "Invalid phone number."
 }
