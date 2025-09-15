@@ -8,6 +8,7 @@ import cors from "cors"
 import morgan from "morgan"
 
 import categoryRouter from "./routes/category.route.js"
+import authRouter from "./routes/auth.routes.js"
 
 dotenv.config()
 
@@ -36,6 +37,7 @@ app.use(cors({
 }))
 
 app.use(`${api}/categories`, categoryRouter)
+app.use(`${api}/auth`, authRouter)
 
 app.get(`${api}/health`, (req, res) => {
     res.send(req.t("validationFailed"))
