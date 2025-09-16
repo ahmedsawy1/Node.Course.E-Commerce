@@ -39,4 +39,40 @@ router.post("/register", registerValidation, handleValidationErrors ,async (req,
   }
 });
 
+router.post("/login", async(req, res) => {
+  try {
+
+    const { email, password } = req.body
+
+    const userData = await User.findOne({ email })
+
+    const isPasswordCorrect = await userData.comparePassword(password)
+
+    if(!isPasswordCorrect) {
+      return res.status(401).json({
+        success: false,
+        message: req.t("incorrectPassword")
+      })
+    }
+
+    const token = generateToken(userData)
+
+    res.json({
+      success: true,
+      message: req.t("loginSuccessful"),
+      data: {
+        user: userData.toJSON(),
+        token: token
+      }
+    })
+    
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+})
+
 export default router

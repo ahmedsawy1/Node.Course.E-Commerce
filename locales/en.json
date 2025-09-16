@@ -54,5 +54,6 @@
   "postalCodeRequired": "Postal code is required.",
   "addressLine1Required": "First address is required.",
   "phoneNumberRequired": "Phone number is required.",
-  "invalidPhoneNumber": "Invalid phone number."
+  "invalidPhoneNumber": "Invalid phone number.",
+  "incorrectPassword": "Password is not correct."
 }
