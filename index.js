@@ -9,6 +9,7 @@ import morgan from "morgan"
 
 import categoryRouter from "./routes/category.route.js"
 import authRouter from "./routes/auth.routes.js"
+import { authMiddleware } from "./middleware/auth.middleware.js"
 
 dotenv.config()
 
@@ -35,6 +36,8 @@ app.use(cors({
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization", "Accept-Language"]
 }))
+
+app.use(authMiddleware)
 
 app.use(`${api}/categories`, categoryRouter)
 app.use(`${api}/auth`, authRouter)
