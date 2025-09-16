@@ -46,6 +46,14 @@ router.post("/login", async(req, res) => {
 
     const userData = await User.findOne({ email })
 
+    // if user is not exist 
+    if (!userData) {
+        return res.status(401).json({
+          success: false,
+          message: req.t("userNotFound"),
+        });
+      }
+
     const isPasswordCorrect = await userData.comparePassword(password)
 
     if(!isPasswordCorrect) {
