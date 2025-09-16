@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt"
+import { addCommonVirtuals } from "../helpers/mongoose-plugin.js";
 
 const userSchema = new mongoose.Schema(
   {
@@ -91,13 +92,7 @@ userSchema.methods.toJSON = function () {
 }
 
 // _id => id
-userSchema.virtual("id").get(function() {
-    return this._id.toHexString()
-})
-
-userSchema.set("toJSON", {
-    virtuals: true
-})
+userSchema.plugin(addCommonVirtuals)
 
 const User = mongoose.model("User", userSchema);
 export default User;

@@ -41,7 +41,15 @@ export const registerValidation = [
         .withMessage((value, { req }) => req.t("invalidPhoneNumber"))
 ]
 
+export const loginValidation = [
+    body("email")
+        .isEmail()
+        .withMessage((value, { req }) => req.t("enterValidEmail")),
 
+    body("password")
+        .isLength({ min: 6 })
+        .withMessage((value, { req }) => req.t("passwordMinLength")),
+]
 
 export const handleValidationErrors = (req, res, next) => {
     const errors = validationResult(req)

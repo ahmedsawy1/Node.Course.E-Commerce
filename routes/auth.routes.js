@@ -1,7 +1,8 @@
 import express from "express";
 import User from "../models/user.model.js";
-import { registerValidation, handleValidationErrors } from "../validators/auth.validator.js";
+import { registerValidation, handleValidationErrors, loginValidation } from "../validators/auth.validator.js";
 import { generateToken } from "../helpers/jwt.js";
+import { handleRouteError } from "../helpers/error-handling.js";
 
 const router = express.Router();
 
@@ -31,15 +32,11 @@ router.post("/register", registerValidation, handleValidationErrors ,async (req,
     });
 
   } catch (error) {
-    console.error("Registration error:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+      handleRouteError(error)
   }
 });
 
-router.post("/login", async(req, res) => {
+router.post("/login", loginValidation, handleValidationErrors, async(req, res) => {
   try {
 
     const { email, password } = req.body
@@ -75,11 +72,7 @@ router.post("/login", async(req, res) => {
     })
     
   } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    handleRouteError(error)
   }
 })
 
