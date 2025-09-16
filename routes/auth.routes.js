@@ -32,7 +32,7 @@ router.post("/register", registerValidation, handleValidationErrors ,async (req,
     });
 
   } catch (error) {
-      handleRouteError(error)
+      handleRouteError(error, res)
   }
 });
 
@@ -72,7 +72,7 @@ router.post("/login", loginValidation, handleValidationErrors, async(req, res) =
     })
     
   } catch (error) {
-    handleRouteError(error)
+    handleRouteError(error, res)
   }
 })
 
