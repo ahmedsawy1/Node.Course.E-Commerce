@@ -3,8 +3,23 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+const publicRoutes = [
+  "POST:/api/v1/auth/login",
+  "POST:/api/v1/auth/register",
+  "GET:/api/v1/categories"
+]
+
 export const authMiddleware = (req, res, next) => {
   try {
+
+    const method = req.method
+    const path = req.path
+    const route = `${method}:${path}`
+
+    if(publicRoutes.some(publicRoute => route.includes(publicRoute))) {
+      return next()
+    }
+
     const token = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
