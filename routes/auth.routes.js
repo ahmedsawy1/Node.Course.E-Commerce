@@ -107,4 +107,48 @@ router.get("/profile", async (req, res) => {
   }
 });
 
+router.put("/profile", async (req, res) => {
+  try {
+    const userId = req.auth.id;
+    const updateBody = req.body;
+
+    if (updateBody.email) {
+      const existingUserByEmail = await User.findOne({
+        email: updateBody.email,
+        _id: { $ne: userId },
+      });
+
+      if (existingUserByEmail) {
+        return res.status(400).json({
+          success: false,
+          message: req.t("emailAlreadyExists"),
+        });
+      }
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: req.t("userNotFound"),
+      });
+    }
+
+    Object.keys(updateBody).forEach((key) => {
+      user[key] = updateBody[key];
+    });
+
+    await user.save();
+
+    res.json({
+      success: true,
+      message: req.t("profileUpdatedSuccessfully"),
+      data: user,
+    });
+  } catch (error) {
+    handleRouteError(error, res);
+  }
+});
+
 export default router;
