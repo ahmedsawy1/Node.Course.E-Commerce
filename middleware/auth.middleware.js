@@ -6,7 +6,8 @@ dotenv.config();
 const publicRoutes = [
   "POST:/api/v1/auth/login",
   "POST:/api/v1/auth/register",
-  "GET:/api/v1/categories"
+  "GET:/api/v1/categories",
+  "GET:/public/uploads"
 ]
 
 export const authMiddleware = (req, res, next) => {

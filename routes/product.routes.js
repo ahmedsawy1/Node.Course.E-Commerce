@@ -1,7 +1,7 @@
 import express from "express";
 import { ProductModel } from "../models/product.model.js";
 import { handleRouteError } from "../helpers/error-handling.js";
-import { getFileURL } from "../middleware/upload.middleware.js";
+import { getFileURL, uploadMultiple } from "../middleware/upload.middleware.js";
 
 const router = express.Router();
 

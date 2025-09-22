@@ -39,6 +39,7 @@ app.use(cors({
 }))
 
 app.use(authMiddleware)
+app.use("/public/uploads", express.static("public/uploads"))
 
 app.use(`${api}/categories`, categoryRouter)
 app.use(`${api}/auth`, authRouter)
