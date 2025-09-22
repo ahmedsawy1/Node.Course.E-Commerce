@@ -4,14 +4,14 @@ const roleAuth = (allowedRoles) => {
       if (!req.auth) {
         return res.status(401).json({
           success: false,
-          message: "Authentication required.",
+          message: req.t("authenticationRequired"),
         });
       }
 
       if (!allowedRoles.includes(req.auth.role)) {
         return res.status(403).json({
           success: false,
-          message: "Insufficient permissions.",
+          message: req.t("insufficientPermissions"),
         });
       }
 

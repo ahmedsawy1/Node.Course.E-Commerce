@@ -26,7 +26,7 @@ const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image/")) {
     cb(null, true);
   } else {
-    cb(new Error("Only images files are allowed"), false);
+    cb(new Error(req.t("onlyImageFilesAllowed")), false);
   }
 };
 
@@ -82,7 +82,7 @@ const handleUploadError = (error, req, res, next) => {
   } else if (error) {
     return res.status(400).json({
       success: false,
-      message: error.message,
+      message: req.t(error.message) || error.message,
     });
   }
 

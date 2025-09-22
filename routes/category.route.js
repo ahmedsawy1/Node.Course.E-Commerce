@@ -25,7 +25,7 @@ router.get("/", async (req, res) => {
   try {
     const categoriesList = await Category.find();
     if (!categoriesList || categoriesList.length === 0) {
-      return res.send({message: "noCategories"})
+      return res.send({message: req.t("noCategories")})
     }
     res.send(categoriesList);
   } catch (err) {

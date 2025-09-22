@@ -26,7 +26,7 @@ export const authMiddleware = (req, res, next) => {
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "Access token is required",
+        message: req.t("accessTokenRequired"),
       });
     }
 
@@ -44,7 +44,7 @@ export const authMiddleware = (req, res, next) => {
   } catch (error) {
     return res.status(401).json({
       success: false,
-      message: "Invalid or expired token",
+      message: req.t("invalidOrExpiredToken"),
     });
   }
 };
