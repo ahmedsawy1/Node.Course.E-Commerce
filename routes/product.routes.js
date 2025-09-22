@@ -1,11 +1,12 @@
 import express from "express";
 import { ProductModel } from "../models/product.model.js";
 import { handleRouteError } from "../helpers/error-handling.js";
-import { getFileURL, uploadMultiple } from "../middleware/upload.middleware.js";
+import { getFileURL, handleUploadError, uploadMultiple } from "../middleware/upload.middleware.js";
+import { adminOnly } from "../middleware/roles.middleware.js";
 
 const router = express.Router();
 
-router.post("/", uploadMultiple, async (req, res) => {
+router.post("/", adminOnly, uploadMultiple, handleUploadError,async (req, res) => {
   try {
 
     let imageURLs = []
