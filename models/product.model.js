@@ -31,10 +31,10 @@ const productSchema = mongoose.Schema(
       maxLength: [1000, "Description cannot exceed 1000 characters"],
     },
 
-    // images: {
-    //   type: [String],
-    //   required: [true, "At least one image is required"],
-    // },
+    images: {
+      type: [String],
+      required: [true, "At least one image is required"],
+    },
 
     countInStock: {
       type: Number,

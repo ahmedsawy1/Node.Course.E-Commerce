@@ -42,3 +42,12 @@ const upload = multer({
 export const uploadSingle = upload.single("image")
 
 export const uploadMultiple = upload.array("images", 10)
+
+export const getFileURL = (req, filename) => {
+    const protocol = req.protocol // http https
+    const host = req.get("host") // localhost:3000 or myapp.com
+
+    const url = `${protocol}://${host}/public/uploads/${filename}`
+
+    return url
+}
