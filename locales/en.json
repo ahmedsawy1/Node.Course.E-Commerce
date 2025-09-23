@@ -30,7 +30,7 @@
   "noCategories": "No Categories",
   "noImageInRequest": "No image in the request",
   "noOrdersFound": "No orders found",
-  "noProducts": "No Products",
+  "noProducts": "No Products Found",
   "orderCreatedSuccessfully": "Order created successfully",
   "orderDeletedSuccessfully": "Order deleted successfully",
   "orderItemsRequired": "Order items are required and must be an array",

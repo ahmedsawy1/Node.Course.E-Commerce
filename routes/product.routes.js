@@ -52,7 +52,32 @@ router.post(
 
 router.get("/", userAndAdmin, async (req, res) => {
   try {
-    const productsList = await ProductModel.find().populate("category", "name");
+    const search = req.query.search
+    const categoryID = req.query.categoryID
+
+    const filter = {}
+
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description : { $regex: search, $options: "i" } }
+      ]
+    }
+
+    if (categoryID) {
+      filter.category = categoryID
+    }
+
+    const productsList = await ProductModel.find(filter).populate("category", "name");
+
+    if (!productsList || productsList.length === 0) {
+      return res.send({
+        message: req.t("noProducts"),
+        data: [],
+        search, 
+        categoryID
+      });
+    }
 
     res.send({
       data: productsList,
