@@ -9,6 +9,7 @@ import {
 import { adminOnly, userAndAdmin } from "../middleware/roles.middleware.js";
 import {
   createProductValidation,
+  updateProductValidation,
   handleValidationErrors,
 } from "../validators/product.validator.js";
 
@@ -125,6 +126,72 @@ router.get("/:id", async (req, res) => {
     handleRouteError(error, res);
   }
 });
+
+router.put(
+  "/:id",
+  adminOnly,
+  uploadMultiple,
+  handleUploadError,
+  updateProductValidation,
+  handleValidationErrors,
+  async (req, res) => {
+    try {
+      // Check if product exists
+      const existingProduct = await ProductModel.findById(req.params.id);
+      if (!existingProduct) {
+        return res.status(404).json({
+          success: false,
+          message: req.t("productNotFound"),
+        });
+      }
+
+      // Prepare update data
+      const updateData = {};
+
+      // Only update fields that are provided in the request
+      if (req.body.title !== undefined) updateData.title = req.body.title;
+      if (req.body.price !== undefined)
+        updateData.price = parseFloat(req.body.price);
+      if (req.body.category !== undefined)
+        updateData.category = req.body.category;
+      if (req.body.countInStock !== undefined)
+        updateData.countInStock = parseInt(req.body.countInStock);
+      if (req.body.description !== undefined)
+        updateData.description = req.body.description;
+
+      // Handle image uploads
+      if (req.files && req.files.length > 0) {
+        const imageURLs = req.files.map((file) =>
+          getFileURL(req, file.filename)
+        );
+
+        if (req.body.replaceImages === "true") {
+          updateData.images = imageURLs;
+        } else {
+          updateData.images = [...existingProduct.images, ...imageURLs];
+        }
+      }
+
+      // Update the product
+      const updatedProduct = await ProductModel.findByIdAndUpdate(
+        req.params.id,
+        updateData,
+        {
+          new: true,
+          runValidators: true,
+        }
+      ).populate("category");
+
+      return res.status(200).json({
+        success: true,
+        message: req.t("productUpdatedSuccessfully"),
+        data: updatedProduct,
+      });
+    } catch (error) {
+      handleRouteError(error, res);
+    }
+  }
+);
 
 router.delete("/:id", adminOnly, async (req, res) => {
   try {
