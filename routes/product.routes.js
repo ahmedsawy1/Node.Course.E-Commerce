@@ -76,7 +76,7 @@ router.get("/", userAndAdmin, async (req, res) => {
     const totalCount = await ProductModel.countDocuments(filter);
 
     const productsList = await ProductModel.find(filter)
-      .populate("category", "name")
+      .populate("category")
       .skip(skip)
       .limit(limit);
 
@@ -103,6 +103,36 @@ router.get("/", userAndAdmin, async (req, res) => {
       data: productsList,
       ...sharedDataResponse,
     });
+  } catch (error) {
+    handleRouteError(error, res);
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  try {
+    const product = await ProductModel.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { views: 1 } },
+      { new: true }
+    ).populate("category");
+
+    if (!product) {
+      return res.status(401).send({ message: req.t("productNotFound") });
+    }
+
+    return res.send(product);
+  } catch (error) {
+    handleRouteError(error, res);
+  }
+});
+
+router.delete("/:id", adminOnly, async (req, res) => {
+  try {
+    const product = await ProductModel.findByIdAndDelete(req.params.id);
+    if (!product) {
+      return res.status(404).send({ message: req.t("productNotFound") });
+    }
+    return res.send({ message: req.t("productDeletedSuccessfully") });
   } catch (error) {
     handleRouteError(error, res);
   }
