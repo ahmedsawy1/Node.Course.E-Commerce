@@ -11,6 +11,7 @@ import categoryRouter from "./routes/category.route.js"
 import authRouter from "./routes/auth.routes.js"
 import { authMiddleware } from "./middleware/auth.middleware.js"
 import productRouter from "./routes/product.routes.js"
+import orderRouter from "./routes/order.routes.js"
 
 dotenv.config()
 
@@ -44,6 +45,7 @@ app.use("/public/uploads", express.static("public/uploads"))
 app.use(`${api}/categories`, categoryRouter)
 app.use(`${api}/auth`, authRouter)
 app.use(`${api}/products`, productRouter)
+app.use(`${api}/orders`, orderRouter)
 
 app.get(`${api}/health`, (req, res) => {
     res.send(req.t("validationFailed"))

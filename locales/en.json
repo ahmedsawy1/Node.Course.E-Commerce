@@ -34,7 +34,7 @@
   "orderCreatedSuccessfully": "Order created successfully",
   "orderDeletedSuccessfully": "Order deleted successfully",
   "orderItemsRequired": "Order items are required and must be an array",
-  "orderItemValidation": "Each order item must have product, quantity, and price",
+  "orderItemValidation": "Each order item must have product, quantity.",
   "orderNotFound": "Order not found",
   "ordersRetrievedSuccessfully": "Orders retrieved successfully",
   "orderStatusUpdatedSuccessfully": "Order status updated successfully",
@@ -96,5 +96,11 @@
   "ratingCannotBeLessThanOne": "Rating cannot be less than 1 star",
   "ratingCannotBeMoreThanFive": "Rating cannot be more than 5 stars",
   "ratingCountCannotBeNegative": "Rating count cannot be negative",
-  "viewsCannotBeNegative": "Views cannot be negative"
+  "viewsCannotBeNegative": "Views cannot be negative",
+
+  "invalidProductId": "Invalid product ID.",
+  "quantityMustBeWholeNumber": "Quantity must be a whole number.",
+  "productsNotFound": "Products are not found",
+  "insufficientStock": "Insufficient stock available."
+
 }
