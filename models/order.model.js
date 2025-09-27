@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { addCommonVirtuals } from "../helpers/mongoose-plugin.js";
 
 const orderItemSchema = mongoose.Schema({
   product: {
@@ -46,5 +47,24 @@ const orderSchema = mongoose.Schema(
     timestamps: true,
   }
 );
+
+// return id property. better than _id
+orderSchema.plugin(addCommonVirtuals);
+
+// Calculate total price for order items
+orderSchema.methods.calculateTotalPrice = function () {
+  return this.orderItems.reduce((total, item) => {
+    return total + item.price * item.quantity;
+  }, 0);
+};
+
+// Pre-save middleware: runs automatically before saving an order document.
+orderSchema.pre("save", function (next) {
+  if (this.isModified("orderItems") || !this.totalPrice) {
+    this.totalPrice = this.calculateTotalPrice();
+  }
+
+  next();
+});
 
 export const OrderModel = mongoose.model("Order", orderSchema);
