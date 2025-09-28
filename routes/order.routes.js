@@ -143,7 +143,9 @@ router.get("/", async (req, res ) => {
     }
 
     if(search) {
-      filter.search = search
+      filter.$or = [
+        { status: { $regex: search, $options: "i" } }
+      ]
     }
 
     const skip = (page - 1) * limit
