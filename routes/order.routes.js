@@ -2,7 +2,7 @@ import express from "express";
 import { OrderModel } from "../models/order.model.js";
 import { ProductModel } from "../models/product.model.js";
 import { handleRouteError } from "../helpers/error-handling.js";
-import { userAndAdmin } from "../middleware/roles.middleware.js";
+import { adminOnly, userAndAdmin } from "../middleware/roles.middleware.js";
 import mongoose from "mongoose";
 
 const router = express.Router();
@@ -123,60 +123,73 @@ router.post("/", userAndAdmin, async (req, res) => {
   }
 });
 
-router.get("/", async (req, res ) => {
+router.get("/", async (req, res) => {
   try {
-
-    const { auth: currentUser } = req
-    const isAdmin = currentUser === "admin"
+    const { auth: currentUser } = req;
+    const isAdmin = currentUser === "admin";
 
     // Pagination Params
-    const page = parseInt(req.query.page) || 1
-    const limit = parseInt(req.query.limit) || 10
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
 
     // search param
-    const search = req.query.search || ""
+    const search = req.query.search || "";
 
-    const filter = {}
+    const filter = {};
 
-    if(!isAdmin) {
-      filter.user = currentUser.id
+    if (!isAdmin) {
+      filter.user = currentUser.id;
     }
 
-    if(search) {
-      filter.$or = [
-        { status: { $regex: search, $options: "i" } }
-      ]
+    if (search) {
+      filter.$or = [{ status: { $regex: search, $options: "i" } }];
     }
 
-    const skip = (page - 1) * limit
+    const skip = (page - 1) * limit;
 
-    const totalOrders = await OrderModel.countDocuments(filter)
+    const totalOrders = await OrderModel.countDocuments(filter);
 
     const orderList = await OrderModel.find(filter)
-        .sort({ date: -1})
-        .skip(skip)
-        .limit(limit)
+      .sort({ date: -1 })
+      .skip(skip)
+      .limit(limit);
 
-   const totalPages = Math.ceil(totalOrders / limit)
-   
-   res.send({
-    data: orderList,
-    pagination:{
-      currentPage: page,
-      totalPages,
-      totalOrders,
-      limit,
-      hasNextPage: page < totalPages,
-      hasPrevPage: page > 1
-    },
-    filter: {
-      search
-    }
-   })
-    
+    const totalPages = Math.ceil(totalOrders / limit);
+
+    res.send({
+      data: orderList,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalOrders,
+        limit,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+      filter: {
+        search,
+      },
+    });
   } catch (error) {
-    handleRouteError(error, res);    
+    handleRouteError(error, res);
   }
-})
+});
+
+router.delete("/:id", adminOnly, async (req, res) => {
+  try {
+    const order = await OrderModel.findByIdAndDelete(req.params.id);
+
+    if (!order) {
+      return res.status(404).send({ message: req.t("orderNotFound") });
+    }
+
+    res.send({
+      message: req.t("orderDeletedSuccessfully"),
+      data: order,
+    });
+  } catch (error) {
+    handleRouteError(error, res);
+  }
+});
 
 export default router;
