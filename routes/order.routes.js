@@ -1,6 +1,6 @@
 import express from "express";
 import { OrderModel } from "../models/order.model.js";
-import { ProductModel } from "../models/product.model.js"
+import { ProductModel } from "../models/product.model.js";
 import { handleRouteError } from "../helpers/error-handling.js";
 import { userAndAdmin } from "../middleware/roles.middleware.js";
 import mongoose from "mongoose";
@@ -53,50 +53,56 @@ router.post("/", userAndAdmin, async (req, res) => {
     }
 
     // Verify if product IDs exist in DB or not
-    const productIds = orderItems.map((item) => item.product)
+    const productIds = orderItems.map((item) => item.product);
 
-    const products = await ProductModel.find({ _id: { $in: productIds} })
+    const products = await ProductModel.find({ _id: { $in: productIds } });
 
-    if ( products.length !== productIds.length ) {
+    if (products.length !== productIds.length) {
       return res.status(404).send({
-        message: req.t("productsNotFound")
-      })
+        message: req.t("productsNotFound"),
+      });
     }
 
-    const orderItemsWithPrices = []
+    const orderItemsWithPrices = [];
 
-    for(const item of orderItems) {
-
+    for (const item of orderItems) {
       // Find the product
-      const product = products.find((p) => p._id.toString() === item.product)
-    
-      if(product.countInStock < item.quantity) {
+      const product = products.find((p) => p._id.toString() === item.product);
+
+      if (product.countInStock < item.quantity) {
         return res.status(400).send({
           message: req.t("insufficientStock"),
           productName: product.title,
           availableStock: product.countInStock,
-          requestedQuantity: item.quantity
-        })
+          requestedQuantity: item.quantity,
+        });
       }
 
       orderItemsWithPrices.push({
         product: item.product,
         quantity: item.quantity,
-        price: product.price // from DB 
-      })
+        price: product.price, // from DB
+      });
     }
 
     const totalPrice = orderItemsWithPrices.reduce((total, item) => {
-      return total + item.price * item.quantity
-    }, 0)
+      return total + item.price * item.quantity;
+    }, 0);
 
     const newOrder = new OrderModel({
       orderItems: orderItemsWithPrices,
       user: currentUser.id,
-      totalPrice
-    })
+      totalPrice,
+    });
 
-    const savedOrder = await newOrder.save()
+    const savedOrder = await newOrder.save();
+
+    // Update product stock
+    for (const item of orderItemsWithPrices) {
+      await ProductModel.findByIdAndUpdate(item.product, {
+        $inc: { countInStock: -item.quantity },
+      });
+    }
 
     const populatedOrder = await OrderModel.findById(savedOrder._id)
       .populate(
@@ -104,14 +110,14 @@ router.post("/", userAndAdmin, async (req, res) => {
         "userName email phoneNumber city postalCode addressLine1 addressLine2"
       )
       .populate(
-        "orderItems.product", "title price images countInStock rating views"
-      )
+        "orderItems.product",
+        "title price images countInStock rating views"
+      );
 
     res.status(201).send({
       message: req.t("orderCreatedSuccessfully"),
-      data: populatedOrder
-    })
-    
+      data: populatedOrder,
+    });
   } catch (error) {
     handleRouteError(error, res);
   }
