@@ -123,4 +123,58 @@ router.post("/", userAndAdmin, async (req, res) => {
   }
 });
 
+router.get("/", async (req, res ) => {
+  try {
+
+    const { auth: currentUser } = req
+    const isAdmin = currentUser === "admin"
+
+    // Pagination Params
+    const page = parseInt(req.query.page) || 1
+    const limit = parseInt(req.query.limit) || 10
+
+    // search param
+    const search = req.query.search || ""
+
+    const filter = {}
+
+    if(!isAdmin) {
+      filter.user = currentUser.id
+    }
+
+    if(search) {
+      filter.search = search
+    }
+
+    const skip = (page - 1) * limit
+
+    const totalOrders = await OrderModel.countDocuments(filter)
+
+    const orderList = await OrderModel.find(filter)
+        .sort({ date: -1})
+        .skip(skip)
+        .limit(limit)
+
+   const totalPages = Math.ceil(totalOrders / limit)
+   
+   res.send({
+    data: orderList,
+    pagination:{
+      currentPage: page,
+      totalPages,
+      totalOrders,
+      limit,
+      hasNextPage: page < totalPages,
+      hasPrevPage: page > 1
+    },
+    filter: {
+      search
+    }
+   })
+    
+  } catch (error) {
+    handleRouteError(error, res);    
+  }
+})
+
 export default router;
