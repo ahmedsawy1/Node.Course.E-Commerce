@@ -82,7 +82,7 @@ router.post("/", userAndAdmin, async (req, res) => {
       orderItemsWithPrices.push({
         product: item.product,
         quantity: item.quantity,
-        price: item.price
+        price: product.price // from DB 
       })
     }
 
@@ -98,9 +98,18 @@ router.post("/", userAndAdmin, async (req, res) => {
 
     const savedOrder = await newOrder.save()
 
+    const populatedOrder = await OrderModel.findById(savedOrder._id)
+      .populate(
+        "user",
+        "userName email phoneNumber city postalCode addressLine1 addressLine2"
+      )
+      .populate(
+        "orderItems.product", "title price images countInStock rating views"
+      )
+
     res.status(201).send({
       message: req.t("orderCreatedSuccessfully"),
-      data: savedOrder
+      data: populatedOrder
     })
     
   } catch (error) {
