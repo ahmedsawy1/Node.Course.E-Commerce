@@ -4,6 +4,7 @@ import { ProductModel } from "../models/product.model.js";
 import { handleRouteError } from "../helpers/error-handling.js";
 import { adminOnly, userAndAdmin } from "../middleware/roles.middleware.js";
 import mongoose from "mongoose";
+import { orderStatuses } from "../constants/order.constants.js";
 
 const router = express.Router();
 
@@ -175,6 +176,39 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/:id", userAndAdmin, async (req, res) => {
+  try {
+    const order = await OrderModel.findById(req.params.id)
+      .populate(
+        "user",
+        "userName email phoneNumber city postalCode addressLine1 addressLine2"
+      )
+      .populate(
+        "orderItems.product",
+        "title price images countInStock rating views"
+      );
+
+    if (!order) {
+      return res.status(404).send({ message: req.t("orderNotFound") });
+    }
+
+    const { auth: currentUser } = req;
+
+    if (
+      currentUser.role !== "admin" &&
+      currentUser.id.toString() !== order.user._id.toString()
+    ) {
+      return res.status(403).send({
+        message: req.t("accessDeniedOwnOrdersOnly"),
+      });
+    }
+
+    res.send(order);
+  } catch (error) {
+    handleRouteError(error, res);
+  }
+});
+
 router.delete("/:id", adminOnly, async (req, res) => {
   try {
     const order = await OrderModel.findByIdAndDelete(req.params.id);
@@ -191,5 +225,45 @@ router.delete("/:id", adminOnly, async (req, res) => {
     handleRouteError(error, res);
   }
 });
+
+router.patch("/:id/change-status", adminOnly, async(req, res) => {
+
+
+  try {
+
+    const {status} = req.body
+
+    if(!status ) {
+      return res.status(400).send({
+        message: req.t("statusRequired")
+      })
+    }
+
+    if( !orderStatuses.includes(status)){
+      return res.status(400).send({
+        message: req.t("invalidStatus")
+      })
+    }
+
+    const updatedOrder = await OrderModel.findByIdAndUpdate(
+      req.params.id,
+      {status},
+      {new: true}
+    )
+
+    if(!updatedOrder) {
+      return res.status(404).send({message: req.t("orderNotFound")})
+    }
+
+    res.send({
+      message: req.t("orderStatusUpdatedSuccessfully"),
+      data: updatedOrder
+    })
+    
+  } catch (error) {
+    handleRouteError(error, res)
+  }
+
+})
 
 export default router;
