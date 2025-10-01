@@ -2,7 +2,11 @@ import express from "express";
 import { OrderModel } from "../models/order.model.js";
 import { ProductModel } from "../models/product.model.js";
 import { handleRouteError } from "../helpers/error-handling.js";
-import { adminOnly, userAndAdmin } from "../middleware/roles.middleware.js";
+import {
+  adminOnly,
+  userAndAdmin,
+  userOnly,
+} from "../middleware/roles.middleware.js";
 import mongoose from "mongoose";
 import { orderStatuses } from "../constants/order.constants.js";
 
@@ -226,44 +230,103 @@ router.delete("/:id", adminOnly, async (req, res) => {
   }
 });
 
-router.patch("/:id/change-status", adminOnly, async(req, res) => {
-
-
+router.patch("/:id/change-status", adminOnly, async (req, res) => {
   try {
+    const { status } = req.body;
 
-    const {status} = req.body
-
-    if(!status ) {
+    if (!status) {
       return res.status(400).send({
-        message: req.t("statusRequired")
-      })
+        message: req.t("statusRequired"),
+      });
     }
 
-    if( !orderStatuses.includes(status)){
+    if (!orderStatuses.includes(status)) {
       return res.status(400).send({
-        message: req.t("invalidStatus")
-      })
+        message: req.t("invalidStatus"),
+      });
     }
 
     const updatedOrder = await OrderModel.findByIdAndUpdate(
       req.params.id,
-      {status},
-      {new: true}
-    )
+      { status },
+      { new: true }
+    );
 
-    if(!updatedOrder) {
-      return res.status(404).send({message: req.t("orderNotFound")})
+    if (!updatedOrder) {
+      return res.status(404).send({ message: req.t("orderNotFound") });
     }
 
     res.send({
       message: req.t("orderStatusUpdatedSuccessfully"),
-      data: updatedOrder
-    })
-    
+      data: updatedOrder,
+    });
   } catch (error) {
-    handleRouteError(error, res)
+    handleRouteError(error, res);
   }
+});
 
-})
+// Users only
+// Validate that the order exists in the database
+// Verify that the order belongs to the currently logged-in user
+// Prevent modifications if the order has already been delivered or shipped
+// Increment the product quantity.
+
+
+router.patch("/:id/cancel-order", userOnly, async (req, res) => {
+  try {
+    const { auth: currentUser } = req;
+    const orderId = req.params.id;
+
+    // Find the order
+    const order = await OrderModel.findById(orderId);
+
+    if (!order) {
+      return res.status(404).send({
+        message: req.t("orderNotFound"),
+      });
+    }
+
+    // Check if the order belongs to the current user
+    if (order.user.toString() !== currentUser.id.toString()) {
+      return res.status(403).send({
+        message: req.t("accessDeniedOwnOrdersOnly"),
+      });
+    }
+
+    // Check if order can be cancelled (only pending and processing orders can be cancelled)
+    if (order.status === "cancelled") {
+      return res.status(400).send({
+        message: req.t("orderAlreadyCancelled"),
+      });
+    }
+
+    if (order.status === "shipped" || order.status === "delivered") {
+      return res.status(400).send({
+        message: req.t("cannotCancelShippedOrDeliveredOrder"),
+      });
+    }
+
+    // Update order status to cancelled
+    const updatedOrder = await OrderModel.findByIdAndUpdate(
+      orderId,
+      { status: "cancelled" },
+      { new: true }
+    )
+
+    // Restore product stock
+    for (const item of order.orderItems) {
+      await ProductModel.findByIdAndUpdate(item.product, {
+        $inc: { countInStock: item.quantity },
+      });
+    }
+
+    res.send({
+      message: req.t("orderCancelledSuccessfully"),
+      data: updatedOrder,
+    });
+  } catch (error) {
+    handleRouteError(error, res);
+  }
+});
 
 export default router;
