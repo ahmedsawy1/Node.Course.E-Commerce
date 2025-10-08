@@ -131,7 +131,7 @@ router.post("/", userAndAdmin, async (req, res) => {
 router.get("/", async (req, res) => {
   try {
     const { auth: currentUser } = req;
-    const isAdmin = currentUser === "admin";
+    const isAdmin = currentUser.role === "admin";
 
     // Pagination Params
     const page = parseInt(req.query.page) || 1;
